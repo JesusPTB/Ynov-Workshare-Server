@@ -1,0 +1,6 @@
+@Ynov_WorkShare_Server_HostAddress = http://localhost:5188
+
+GET {{Ynov_WorkShare_Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
