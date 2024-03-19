@@ -1,5 +1,6 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -13,7 +14,7 @@ builder.Services.AddControllers();
 
 builder.Services.AddDbContext<WorkShareDbContext>(
     options => options.UseNpgsql(
-        builder.Configuration.GetConnectionString("LocalConnection")
+        builder.Configuration.GetConnectionString("DockerConnection")
     )
 );
 builder.Services.AddIdentity<User, IdentityRole>(options =>
@@ -52,6 +53,16 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.RegisterAppServices();
 
+builder.Services.AddHttpLogging(logging =>
+{
+    logging.LoggingFields = HttpLoggingFields.All;
+    // logging.RequestHeaders.Add("Authorization");
+    // logging.ResponseHeaders.Add("Authorization");
+    logging.MediaTypeOptions.AddText("application/javascript");
+    logging.RequestBodyLogLimit = 4096;
+    logging.ResponseBodyLogLimit = 4096;
+});
+
 
 var app = builder.Build();
 
@@ -66,7 +77,7 @@ if (app.Environment.IsDevelopment())
 //var provider = scope.ServiceProvider;
 //var context = provider.GetRequiredService<WorkShareDbContext>();
 //context.Database.Migrate();
-
+app.UseHttpLogging();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
