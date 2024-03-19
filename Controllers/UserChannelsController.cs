@@ -1,4 +1,5 @@
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Ynov_WorkShare_Server.Interfaces;
 using Ynov_WorkShare_Server.Models;
@@ -8,6 +9,7 @@ namespace Ynov_WorkShare_Server.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class UserChannelsController: ControllerBase
 {
     private readonly IUserChannelService _iuc;

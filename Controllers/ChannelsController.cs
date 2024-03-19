@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Ynov_WorkShare_Server.Interfaces;
 using Ynov_WorkShare_Server.Models;
@@ -6,6 +7,8 @@ namespace Ynov_WorkShare_Server.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+
+[Authorize]
 public class ChannelsController: ControllerBase
 {
     private readonly IChannelService _ics;
@@ -36,8 +39,8 @@ public class ChannelsController: ControllerBase
         return Ok(c);
     }
         
-    [HttpPut("Update/{id:guid}/Admin/{adminId:guid}")]
-    public async Task<IActionResult> Put(Guid id, Guid adminId)
+    [HttpPut("Update/{id:guid}/Admin/{adminId}")]
+    public async Task<IActionResult> Put(Guid id, string adminId)
     {
         var channel = await _ics.ChangeAdmin(id, adminId);
         return Ok(channel);

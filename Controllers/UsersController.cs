@@ -1,3 +1,5 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Ynov_WorkShare_Server.DTO;
 using Ynov_WorkShare_Server.Interfaces;
@@ -7,6 +9,7 @@ namespace Ynov_WorkShare_Server.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class UsersController : ControllerBase
 {
     private readonly IUserService _ius;
@@ -46,13 +49,20 @@ public class UsersController : ControllerBase
         await _ius.Update(id, user);
         return NoContent();
     }
-
-
+    
     [HttpPost]
-    public async Task<ActionResult<UserDto>> Post(User user)
+    public async Task<IActionResult> RegisterUser(UserRegisterForm user)
     {
-        var u = await _ius.Post(user);
+        var u = await _ius.Register(user);
         return CreatedAtAction("GetUserById", new { id = u.Id }, u);
+    }
+
+    [AllowAnonymous]
+    [HttpPost("Login")]
+    public async Task<IActionResult> LoginUser(LoginForm user)
+    {
+        var result = await _ius.Login(user);
+        return Ok(result);
     }
 
     // DELETE: api/Customers/5

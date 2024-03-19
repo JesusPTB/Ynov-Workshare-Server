@@ -7,7 +7,8 @@ public class Channel
     [Key]
     public Guid Id { get; set; }
     
-    public Guid AdminId { get; set; }
+    [Required]
+    public string AdminId { get; set; }= String.Empty;
     
     [MaxLength(30)]
     public string Name { get; set; } = String.Empty;

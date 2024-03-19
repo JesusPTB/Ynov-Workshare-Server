@@ -172,8 +172,7 @@
             "required": true,
             "style": "simple",
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "type": "string"
             }
           }
         ],
@@ -624,41 +623,55 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/User"
+                "$ref": "#/components/schemas/UserRegisterForm"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/User"
+                "$ref": "#/components/schemas/UserRegisterForm"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/User"
+                "$ref": "#/components/schemas/UserRegisterForm"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Success",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserDto"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserDto"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserDto"
-                }
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Users/Login": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginForm"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginForm"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginForm"
               }
             }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
           }
         }
       }
@@ -667,6 +680,9 @@
   "components": {
     "schemas": {
       "Channel": {
+        "required": [
+          "adminId"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -674,8 +690,8 @@
             "format": "uuid"
           },
           "adminId": {
-            "type": "string",
-            "format": "uuid"
+            "minLength": 1,
+            "type": "string"
           },
           "name": {
             "maxLength": 30,
@@ -683,7 +699,7 @@
             "nullable": true
           },
           "description": {
-            "maxLength": 60,
+            "maxLength": 150,
             "type": "string",
             "nullable": true
           },
@@ -771,6 +787,20 @@
         "type": "integer",
         "format": "int32"
       },
+      "LoginForm": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "password": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "Message": {
         "type": "object",
         "properties": {
@@ -810,25 +840,62 @@
         "properties": {
           "id": {
             "type": "string",
-            "format": "uuid"
+            "nullable": true
+          },
+          "userName": {
+            "type": "string",
+            "nullable": true
+          },
+          "normalizedUserName": {
+            "type": "string",
+            "nullable": true
           },
           "email": {
-            "maxLength": 50,
             "type": "string",
-            "format": "email",
             "nullable": true
           },
-          "pseudo": {
-            "maxLength": 50,
+          "normalizedEmail": {
             "type": "string",
             "nullable": true
+          },
+          "emailConfirmed": {
+            "type": "boolean"
+          },
+          "passwordHash": {
+            "type": "string",
+            "nullable": true
+          },
+          "securityStamp": {
+            "type": "string",
+            "nullable": true
+          },
+          "concurrencyStamp": {
+            "type": "string",
+            "nullable": true
+          },
+          "phoneNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "phoneNumberConfirmed": {
+            "type": "boolean"
+          },
+          "twoFactorEnabled": {
+            "type": "boolean"
+          },
+          "lockoutEnd": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lockoutEnabled": {
+            "type": "boolean"
+          },
+          "accessFailedCount": {
+            "type": "integer",
+            "format": "int32"
           },
           "avatar": {
-            "type": "string",
-            "nullable": true
-          },
-          "password": {
-            "maxLength": 50,
             "type": "string",
             "nullable": true
           },
@@ -869,7 +936,7 @@
           },
           "userId": {
             "type": "string",
-            "format": "uuid"
+            "nullable": true
           },
           "channelId": {
             "type": "string",
@@ -917,6 +984,10 @@
             "type": "string",
             "nullable": true
           },
+          "token": {
+            "type": "string",
+            "nullable": true
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -930,6 +1001,38 @@
             "items": {
               "$ref": "#/components/schemas/UserChannel"
             },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserRegisterForm": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "maxLength": 50,
+            "type": "string",
+            "format": "email",
+            "nullable": true
+          },
+          "pseudo": {
+            "maxLength": 50,
+            "type": "string",
+            "nullable": true
+          },
+          "firstName": {
+            "maxLength": 30,
+            "type": "string",
+            "nullable": true
+          },
+          "lastName": {
+            "maxLength": 30,
+            "type": "string",
+            "nullable": true
+          },
+          "password": {
+            "maxLength": 100,
+            "type": "string",
             "nullable": true
           }
         },

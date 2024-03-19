@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Ynov_WorkShare_Server.Context;
 using Ynov_WorkShare_Server.Interfaces;
@@ -9,16 +10,19 @@ public class ChannelService : IChannelService
 {
     private readonly WorkShareDbContext _context;
     private readonly IUserChannelService _iuc;
+    private readonly UserManager<User> _userManager;
 
-    public ChannelService(WorkShareDbContext context, IUserChannelService userChannelService)
+    public ChannelService(WorkShareDbContext context, IUserChannelService userChannelService,
+        UserManager<User> userManager)
     {
         _context = context;
         _iuc = userChannelService;
+        _userManager = userManager;
     }
     
     public async Task<IEnumerable<Channel>> GetChannelsByUser(Guid userId)
     {
-        if (!_context.Users.AsNoTracking().Any(u => u.Id == userId))
+        if (!_userManager.Users.AsNoTracking().Any(u => u.Id == userId.ToString()))
             throw new KeyNotFoundException("Utilisateur introuvable !");
 
         var channelsId = await _iuc.GetByUser(userId);
@@ -53,7 +57,8 @@ public class ChannelService : IChannelService
 
     public async Task<Channel> Post(Channel channel)
     {
-        if (!_context.Users.Any(u => u.Id == channel.AdminId)) throw new KeyNotFoundException("Utilisateur introuvable !");
+        if (!_userManager.Users.Any(u => u.Id == channel.AdminId.ToString())) 
+            throw new KeyNotFoundException("Utilisateur introuvable !");
         
         using var transaction = await _context.Database.BeginTransactionAsync();
         _context.Channels.Add(channel);
@@ -83,9 +88,10 @@ public class ChannelService : IChannelService
         return channel;
     }
     
-    public async Task<Channel> ChangeAdmin(Guid id, Guid adminId)
+    public async Task<Channel> ChangeAdmin(Guid id, String adminId)
     {
-        if (!_context.Users.Any(u => u.Id == adminId)) throw new KeyNotFoundException("Utilisateur introuvable !");
+        if (!_userManager.Users.Any(u => u.Id == adminId.ToString()))
+            throw new KeyNotFoundException("Utilisateur introuvable !");
         
         var channel = await _context.Channels.AsNoTracking().
             Include(c => c.Messages).
