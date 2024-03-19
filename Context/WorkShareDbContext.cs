@@ -53,7 +53,7 @@ public class WorkShareDbContext : DbContext
         base.OnModelCreating(modelBuilder);
     }
     
-    public new DbSet<User> Users { get; set; }
+    public DbSet<User> Users { get; set; }
     public DbSet<Channel> Channels { get; set; }
     public DbSet<UserChannel> UserChannels { get; set; } 
     public DbSet<Message> Messages { get; set; }

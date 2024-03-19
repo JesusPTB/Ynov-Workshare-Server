@@ -1,10 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 using Ynov_WorkShare_Server.Context;
 using Ynov_WorkShare_Server.Extensions;
+using Ynov_WorkShare_Server.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+builder.Services.AddSignalR();
 
 builder.Services.AddDbContext<WorkShareDbContext>(
     options => options.UseNpgsql(
@@ -36,4 +38,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.MapControllers();
+app.MapHub<ChatHub>("/ChatHub");
+
 app.Run();
