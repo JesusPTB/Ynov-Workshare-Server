@@ -1,5 +1,10 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Runtime.InteropServices;
+using System.Security.Claims;
+using System.Text;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Npgsql;
 using Ynov_WorkShare_Server.Context;
 using Ynov_WorkShare_Server.DTO;
@@ -12,11 +17,16 @@ public class UserService: IUserService
 {
     private readonly WorkShareDbContext _context;
     private readonly IUserChannelService _iuc;
+    private readonly UserManager<User> _userManager;
+    private readonly IConfiguration _config;
 
-    public UserService(WorkShareDbContext context, IUserChannelService userChannelService)
+    public UserService(WorkShareDbContext context, IUserChannelService userChannelService,
+        UserManager<User> userManager, IConfiguration configuration)
     {
         _context = context;
         _iuc = userChannelService;
+        _userManager = userManager;
+        _config = configuration;
     }
 
     public async Task<IEnumerable<UserDto>> GetByChannel(Guid channelId)
@@ -29,7 +39,7 @@ public class UserService: IUserService
         
         foreach (var userId in usersId)
         {
-            var user = await _context.Users.Include(u => u.UserChannels).
+            var user = await _userManager.Users.Include(u => u.UserChannels).
                 Select(u=> new UserDto(u)).
                 FirstOrDefaultAsync(u => u.Id == userId);
             
@@ -42,33 +52,34 @@ public class UserService: IUserService
     
     public async Task<IEnumerable<UserDto>> GetAll()
     {
-        return await _context.Users.AsNoTracking().OrderBy(u=>u.Email)
+        return await _userManager.Users.AsNoTracking().OrderBy(u=>u.Email)
             .Include(u=>u.UserChannels)
             .Select(u => new UserDto(u)).ToListAsync();
     }
 
     public async Task<UserDto> GetById(Guid id)
     {
-        var user = await _context.Users.Include(u => u.UserChannels).
+        var user = await _userManager.Users.Include(u => u.UserChannels).
             
-            FirstOrDefaultAsync(u => u.Id == id);
+            FirstOrDefaultAsync(u => u.Id == id.ToString());
         if (user is null) throw new KeyNotFoundException("Utilisateur introuvable !");
         return new UserDto(user);
     }
 
     public async Task<UserDto> GetByEmail(string email)
     {
-        var user = await _context.Users.Include(u => u.UserChannels).FirstOrDefaultAsync(u => u.Email == email);
+        var user = await _userManager.Users.Include(u => u.UserChannels).FirstOrDefaultAsync(u => u.Email == email);
         if (user is null) throw new KeyNotFoundException("Utilisateur introuvable !");
         return new UserDto(user);
     }
-
-    public async Task<UserDto> Post(User user)
+    
+    
+    public async Task<UserDto> Register(UserRegisterForm userForm)
     {
-        _context.Users.Add(user);
         try
         {
-            await _context.SaveChangesAsync();
+            var result = await _userManager.CreateAsync(userForm.ToUser(), userForm.Password);
+            if (!result.Succeeded) throw new Exception(result.ToString());
         }
         catch (Exception ex)
         {
@@ -78,21 +89,28 @@ public class UserService: IUserService
             }
             throw new ExternalException(ex.Message);
         }
-        return new UserDto(user);
+        return new UserDto(_userManager.Users.AsNoTracking().First(u =>u.Email == userForm.Email));
     }
 
     public async Task<UserDto> Update(Guid id, User user)
     {
-        if (!_context.Users.Any(u => u.Id == id)) throw new KeyNotFoundException("Utilisateur introuvable !");
+
+        if (id.ToString() != user.Id) throw new KeyNotFoundException("Utilisateur introuvable !");
         
-        user.UpdatedAt = DateTime.UtcNow;
-        _context.Entry(user).State = EntityState.Modified;
-        _context.Entry(user).Property(a => a.CreatedAt).IsModified = false;
-        _context.Entry(user).Property(a => a.Email).IsModified = false;
+        var userDb = _userManager.Users.FirstOrDefault(u => u.Id == id.ToString());
+        if (userDb is null) throw new KeyNotFoundException("Utilisateur introuvable !");
+        
+        userDb.UpdatedAt = DateTime.UtcNow;
+        userDb.FirstName = user.FirstName;
+        userDb.LastName = user.LastName;
+        userDb.UserName = user.UserName;
+        userDb.Avatar = user.Avatar;
+       
 
         try
         {
-            await _context.SaveChangesAsync();
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded) throw new Exception(result.ToString());
         }
         catch (Exception ex)
         {
@@ -107,10 +125,60 @@ public class UserService: IUserService
 
     public async Task Delete(Guid id)
     {
-        var user =  _context.Users.AsNoTracking().FirstOrDefault(u => u.Id == id);
+        var user =  _userManager.Users.AsNoTracking().FirstOrDefault(u => u.Id == id.ToString());
         if (user is null) throw new KeyNotFoundException("Utilisateur introuvable !");
-        _context.Users.Remove(user);
-        await _context.SaveChangesAsync();
+        await _userManager.DeleteAsync(user);
+    }
+    
+    public async Task UpdatePassword( UpdatePwdDto form)
+    {
+        var user = await _userManager.FindByEmailAsync(form.Email);
+
+        if (user is null)
+            throw new KeyNotFoundException("Utilisateur introuvable !");
+
+        var result = await _userManager.ChangePasswordAsync(user, form.CurrentPassword, form.NewPassword);
+
+        if (!result.Succeeded) throw new Exception(result.ToString());
+                
+    }
+    
+    public async Task<UserDto> Login(LoginForm user)
+    {
+        var identityUser = await _userManager.FindByEmailAsync(user.Email);
+        if (identityUser is null)
+            throw new KeyNotFoundException("Email ou mot de passe incorrect");
+
+        if (! await _userManager.CheckPasswordAsync(identityUser, user.Password))
+            throw new Exception("Email ou mot de passe incorrect");
+            
+        return this.GenerateTokenString(user.Email);
+    }
+    
+    private UserDto GenerateTokenString(string email)
+    {
+        var user = _context.Users.First(u => u.Email == email);
+        
+        IEnumerable<Claim> claims = new List<Claim> {
+            new Claim(ClaimTypes.Email, email)
+        };
+        var signinKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(
+                _config.GetSection("Jwt:Key").Value!
+            )
+        );
+        SigningCredentials signinCred = new (signinKey, SecurityAlgorithms.HmacSha512Signature);
+        var securityToken = new JwtSecurityToken(
+            claims : claims,
+            expires: DateTime.UtcNow.AddMonths(2),
+            issuer: _config.GetSection("Jwt:Issuer").Value,
+            //audience:_config.GetSection("Jwt:Audience").Value,
+            signingCredentials: signinCred
+        );
+          
+        var tokenString = new JwtSecurityTokenHandler().WriteToken(securityToken);
+
+        return new  UserDto(user, tokenString);
     }
     
     private static void HandleException(PostgresException exception)

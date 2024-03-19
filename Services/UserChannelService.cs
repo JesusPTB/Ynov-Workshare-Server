@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Ynov_WorkShare_Server.Context;
 using Ynov_WorkShare_Server.Interfaces;
@@ -8,18 +9,20 @@ namespace Ynov_WorkShare_Server.Services;
 public class UserChannelService: IUserChannelService
 {
     private readonly WorkShareDbContext _context;
+    private readonly UserManager<User> _userManager;
     
-    public UserChannelService(WorkShareDbContext context)
+    public UserChannelService(WorkShareDbContext context,  UserManager<User> userManager)
     {
         _context = context;
+        _userManager = userManager;
     }
     
     public async Task<IEnumerable<Guid>> GetByUser(Guid userId)
     {
-        if (!_context.Users.AsNoTracking().Any(u => u.Id == userId))
+        if (!_userManager.Users.AsNoTracking().Any(u => u.Id == userId.ToString()))
             throw new KeyNotFoundException("Utilisateur introuvable !");
 
-        return await _context.UserChannels.Where(uc => uc.UserId == userId).Select(uc => uc.ChannelId).ToListAsync();
+        return await _context.UserChannels.Where(uc => uc.UserId == userId.ToString()).Select(uc => uc.ChannelId).ToListAsync();
     }
 
     public async Task<IEnumerable<Guid>> GetByChannel(Guid channelId)
@@ -27,7 +30,7 @@ public class UserChannelService: IUserChannelService
         if (!_context.Channels.AsNoTracking().Any(c => c.Id == channelId))
             throw new KeyNotFoundException("Canal introuvable !");
         
-        return await _context.UserChannels.Where(uc => uc.ChannelId == channelId).Select(uc => uc.UserId).ToListAsync();
+        return await _context.UserChannels.Where(uc => uc.ChannelId == channelId).Select(uc => Guid.Parse(uc.UserId)).ToListAsync();
     }
 
     public async Task<UserChannel> GetById(Guid id)
@@ -41,7 +44,7 @@ public class UserChannelService: IUserChannelService
 
     public async Task<UserChannel> Post(UserChannel userChannel)
     {
-        if (!_context.Users.AsNoTracking().Any(u => u.Id == userChannel.UserId))
+        if (!_userManager.Users.AsNoTracking().Any(u => u.Id == userChannel.UserId))
             throw new KeyNotFoundException("Utilisateur introuvable !");
         
         if (!_context.Channels.AsNoTracking().Any(c => c.Id == userChannel.ChannelId))
@@ -55,7 +58,7 @@ public class UserChannelService: IUserChannelService
     public async Task<UserChannel> SetIsMuted(Guid id, Guid userId, bool mute)
     {
         var userChannel = await _context.UserChannels.AsNoTracking()
-            .FirstOrDefaultAsync(uc => uc.ChannelId == id && uc.UserId == userId);
+            .FirstOrDefaultAsync(uc => uc.ChannelId == id && uc.UserId == userId.ToString());
         
         if (userChannel is null)
             throw new KeyNotFoundException("Utilisateur introuvable dans ce canal !");

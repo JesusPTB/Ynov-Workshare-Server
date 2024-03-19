@@ -12,9 +12,13 @@ public interface IUserService
     
     Task<UserDto> GetByEmail(string email);
 
-    Task<UserDto> Post(User user);
+    Task<UserDto> Register(UserRegisterForm userForm);
 
     Task<UserDto> Update(Guid id, User user);
+
+    Task UpdatePassword(UpdatePwdDto form);
+
+    Task<UserDto> Login(LoginForm user);
 
     Task Delete(Guid id);
 

@@ -24,6 +24,8 @@ public class UserDto
     [MaxLength(30)]
     public string LastName { get; set; }
     
+    public string Token { get; set; } = "";
+    
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set;}
@@ -32,15 +34,29 @@ public class UserDto
 
     public UserDto(User user)
     {
-        Id = user.Id;
-        Email = user.Email;
-        Pseudo = user.Pseudo;
+        Id = Guid.Parse(user.Id);
+        Email = user.Email!;
+        Pseudo = user.UserName!;
         Avatar = user.Avatar;
         FirstName = user.FirstName;
         LastName = user.LastName;
         CreatedAt = user.CreatedAt;
         UpdatedAt = user.UpdatedAt;
         UserChannels = user.UserChannels;
+    }
+    
+    public UserDto(User user, string token)
+    {
+        Id = Guid.Parse(user.Id);
+        Email = user.Email!;
+        Pseudo = user.UserName!;
+        Avatar = user.Avatar;
+        FirstName = user.FirstName;
+        LastName = user.LastName;
+        CreatedAt = user.CreatedAt;
+        UpdatedAt = user.UpdatedAt;
+        UserChannels = user.UserChannels;
+        Token = token;
     }
 
     
