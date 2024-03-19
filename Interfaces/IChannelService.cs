@@ -14,6 +14,6 @@ public interface IChannelService
 
     Task Delete(Guid id);
 
-    Task<Channel> ChangeAdmin(Guid id, Guid adminId);
+    Task<Channel> ChangeAdmin(Guid id, string adminId);
 
 }

@@ -1,27 +1,15 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Ynov_WorkShare_Server.Models;
 
 [Index(nameof(Email), IsUnique = true)]
-[Index(nameof(Pseudo), IsUnique = true)]
-public class User
+[Index(nameof(UserName), IsUnique = true)]
+public class User : IdentityUser
 {
-    [Key]
-    public Guid Id { get; set; }
-    
-    [EmailAddress]
-    [MaxLength(50)]
-    public string Email { get; set; } = String.Empty;
-    
-    [MaxLength(50)]
-    public string Pseudo { get; set; } = String.Empty;
-    
     public string Avatar { get; set; } = String.Empty;
-    
-    [MaxLength(50)]
-    public string Password { get; set; } = String.Empty;
     
     [MaxLength(30)]
     public string FirstName { get; set; } = String.Empty;

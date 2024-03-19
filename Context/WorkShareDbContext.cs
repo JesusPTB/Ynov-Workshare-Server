@@ -1,10 +1,11 @@
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Ynov_WorkShare_Server.Models;
 using File = Ynov_WorkShare_Server.Models.File;
 
 namespace Ynov_WorkShare_Server.Context;
 
-public class WorkShareDbContext : DbContext
+public class WorkShareDbContext : IdentityDbContext<User>
 {
     public WorkShareDbContext(DbContextOptions<WorkShareDbContext> options) : base(options)
     {
@@ -53,7 +54,6 @@ public class WorkShareDbContext : DbContext
         base.OnModelCreating(modelBuilder);
     }
     
-    public new DbSet<User> Users { get; set; }
     public DbSet<Channel> Channels { get; set; }
     public DbSet<UserChannel> UserChannels { get; set; } 
     public DbSet<Message> Messages { get; set; }
