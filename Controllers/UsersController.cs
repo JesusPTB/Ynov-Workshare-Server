@@ -50,6 +50,7 @@ public class UsersController : ControllerBase
         return NoContent();
     }
     
+    [AllowAnonymous]
     [HttpPost]
     public async Task<IActionResult> RegisterUser(UserRegisterForm user)
     {

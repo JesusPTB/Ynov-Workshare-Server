@@ -58,8 +58,8 @@ builder.Services.RegisterAppServices();
 builder.Services.AddHttpLogging(logging =>
 {
     logging.LoggingFields = HttpLoggingFields.All;
-    // logging.RequestHeaders.Add("Authorization");
-    // logging.ResponseHeaders.Add("Authorization");
+    logging.RequestHeaders.Add("Authorization");
+    logging.ResponseHeaders.Add("Authorization");
     logging.MediaTypeOptions.AddText("application/javascript");
     logging.RequestBodyLogLimit = 4096;
     logging.ResponseBodyLogLimit = 4096;
