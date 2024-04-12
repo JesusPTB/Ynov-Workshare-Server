@@ -75,12 +75,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-//using var scope = app.Services.CreateScope();
-//var provider = scope.ServiceProvider;
-//var context = provider.GetRequiredService<WorkShareDbContext>();
-//context.Database.Migrate();
+using var scope = app.Services.CreateScope();
+var provider = scope.ServiceProvider;
+var context = provider.GetRequiredService<WorkShareDbContext>();
+context.Database.Migrate();
+
+
 app.UseHttpLogging();
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
