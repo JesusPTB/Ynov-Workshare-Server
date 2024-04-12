@@ -31,4 +31,9 @@
       <Compile Remove="Migrations\20240315140722_IncreaseDescriptionLength.Designer.cs" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="data\" />
+      <Folder Include="Migrations\" />
+    </ItemGroup>
+
 </Project>

@@ -1,0 +1,22 @@
+# This is a generated file. Not intended for manual editing.
+version: "3.8"
+services:
+  server:
+    build:
+      context: "/Users/sada/Projets/Workshare/Ynov-Workshare-Server"
+      dockerfile: "Dockerfile"
+      target: "base"
+    command: []
+    entrypoint:
+    - "dotnet"
+    - "/app/bin/Debug/net8.0/Ynov-WorkShare-Server.dll"
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      DOTNET_USE_POLLING_FILE_WATCHER: "true"
+    image: "ynov-workshare-server:dev"
+    ports: []
+    volumes:
+    - "/Users/sada/.nuget/packages:/home/app/.nuget/packages"
+    - "/Users/sada/Projets/Workshare/Ynov-Workshare-Server:/app:rw"
+    - "/Users/sada/Projets/Workshare/Ynov-Workshare-Server:/src:rw"
+    working_dir: "/app"
