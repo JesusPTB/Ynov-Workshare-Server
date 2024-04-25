@@ -1,16 +1,14 @@
-
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Ynov_WorkShare_Server.Interfaces;
 using Ynov_WorkShare_Server.Models;
-
 
 namespace Ynov_WorkShare_Server.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
 [Authorize]
-public class UserChannelsController: ControllerBase
+public class UserChannelsController : ControllerBase
 {
     private readonly IUserChannelService _iuc;
 
@@ -18,13 +16,13 @@ public class UserChannelsController: ControllerBase
     {
         _iuc = userChannel;
     }
-        
+
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<UserChannel>> Get(Guid id)
     {
         return Ok(await _iuc.GetById(id));
     }
-    
+
     [HttpPut("Update/{id:guid}/User/{userId:guid}")]
     public async Task<IActionResult> Put(Guid id, Guid userId, [FromQuery] bool isMuted)
     {
@@ -47,5 +45,4 @@ public class UserChannelsController: ControllerBase
         await _iuc.Remove(id);
         return NoContent();
     }
-
 }

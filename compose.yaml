@@ -30,6 +30,10 @@ services:
       - "8080:8080"
     networks:
       - postgres-server-network
+    links:
+      - postgres:postgres
+    depends_on:
+      - postgres
 
 volumes:
   postgres-db-volume:

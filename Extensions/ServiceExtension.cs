@@ -5,7 +5,7 @@ namespace Ynov_WorkShare_Server.Extensions;
 
 public static class ServiceExtension
 {
-    public static void RegisterAppServices(this IServiceCollection services) 
+    public static void RegisterAppServices(this IServiceCollection services)
     {
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IChannelService, ChannelService>();

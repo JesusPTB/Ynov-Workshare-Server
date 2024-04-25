@@ -4,8 +4,8 @@ namespace Ynov_WorkShare_Server.Interfaces;
 
 public interface IChannelService
 {
-    Task<IEnumerable<Channel>> GetChannelsByUser( Guid userId);
-    
+    Task<IEnumerable<Channel>> GetChannelsByUser(Guid userId);
+
     Task<Channel> Get(Guid id);
 
     Task<Channel> Post(Channel channel);
@@ -15,5 +15,4 @@ public interface IChannelService
     Task Delete(Guid id);
 
     Task<Channel> ChangeAdmin(Guid id, string adminId);
-
 }

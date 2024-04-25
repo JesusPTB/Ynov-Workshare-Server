@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Ynov_WorkShare_Server.DTO;
@@ -18,38 +17,38 @@ public class UsersController : ControllerBase
     {
         _ius = userService;
     }
-    
+
     [HttpGet("{id}")]
     public async Task<ActionResult<UserDto>> GetUserById(Guid id)
     {
         return Ok(await _ius.GetById(id));
     }
-    
+
     [HttpGet("Channel/{id}")]
     public async Task<ActionResult<UserDto>> GetUserByChannelId(Guid channelId)
     {
         return Ok(await _ius.GetByChannel(channelId));
     }
-    
+
     [HttpGet("All")]
     public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUsers()
     {
         return Ok(await _ius.GetAll());
     }
-    
+
     [HttpGet("Email")]
     public async Task<ActionResult<UserDto>> GetUserById([FromQuery] string email)
     {
         return Ok(await _ius.GetByEmail(email));
     }
-    
+
     [HttpPut("{id}")]
     public async Task<IActionResult> Put(Guid id, User user)
     {
         await _ius.Update(id, user);
         return NoContent();
     }
-    
+
     [AllowAnonymous]
     [HttpPost]
     public async Task<IActionResult> RegisterUser(UserRegisterForm user)
@@ -63,6 +62,7 @@ public class UsersController : ControllerBase
     public async Task<IActionResult> LoginUser(LoginForm user)
     {
         var result = await _ius.Login(user);
+        if (result is null) return Unauthorized("Email ou mot de passe incorrect");
         return Ok(result);
     }
 

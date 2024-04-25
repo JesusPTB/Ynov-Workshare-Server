@@ -9,29 +9,23 @@ namespace Ynov_WorkShare_Server.Models;
 [Index(nameof(UserName), IsUnique = true)]
 public class User : IdentityUser
 {
-    public string Avatar { get; set; } = String.Empty;
-    
-    [MaxLength(30)]
-    public string FirstName { get; set; } = String.Empty;
-    
-    [MaxLength(30)]
-    public string LastName { get; set; } = String.Empty;
-    
+    public string Avatar { get; set; } = string.Empty;
+
+    [MaxLength(30)] public string FirstName { get; set; } = string.Empty;
+
+    [MaxLength(30)] public string LastName { get; set; } = string.Empty;
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    public DateTime UpdatedAt { get; set;} = DateTime.UtcNow;
-    
-    
-    //----------- Relations ------------
-    [JsonIgnore]
-    public virtual ICollection<Channel>? AdministratedChannels { get; set; }
-    
-    public virtual ICollection<UserChannel>? UserChannels { get; set; }
-    
-    [JsonIgnore]
-    public virtual ICollection<Message>? Messages { get; set; }
-    
-    [JsonIgnore]
-    public virtual ICollection<File>? File { get; set; }
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
+
+    //----------- Relations ------------
+    [JsonIgnore] public virtual ICollection<Channel>? AdministratedChannels { get; set; }
+
+    public virtual ICollection<UserChannel>? UserChannels { get; set; }
+
+    [JsonIgnore] public virtual ICollection<Message>? Messages { get; set; }
+
+    [JsonIgnore] public virtual ICollection<File>? File { get; set; }
 }
